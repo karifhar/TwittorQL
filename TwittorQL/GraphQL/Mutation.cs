@@ -1,4 +1,6 @@
 ﻿using HotChocolate;
+using Microsoft.AspNetCore.Http;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using TwittorQL.GraphQL.Data;
@@ -28,6 +30,31 @@ namespace TwittorQL.GraphQL
             {
                 Id = newUser.Id,
                 Username = newUser.Username,
+            });
+        }
+       
+
+        // Twittor
+        public async Task<TweetData> addPost(TweetInput input, [Service] TwittorDbContext context)
+        {
+            var user = context.Users.Where(p => p.Id == input.id);
+            if (user != null)
+            {
+                return await Task.FromResult(new TweetData());
+            }
+            var twot = new Tweet
+            {
+                ProfileId = input.id,
+                Post = input.post,
+                Created = DateTime.Now
+            };
+            context.Tweets.Add(twot);
+            await context.SaveChangesAsync();
+            return await Task.FromResult(new TweetData()
+            {
+                Id = twot.Id,
+                Post = twot.Post,
+                Created = twot.Created
             });
         }
     }
