@@ -35,7 +35,7 @@ namespace TwittorQL.GraphQL
        
 
         // Twittor
-        public async Task<TweetData> addPost(TweetInput input, [Service] TwittorDbContext context)
+        public async Task<TweetData> AddPost(TweetInput input, [Service] TwittorDbContext context)
         {
             var user = context.Users.Where(p => p.Id == input.id);
             if (user != null)
@@ -57,6 +57,28 @@ namespace TwittorQL.GraphQL
                 Created = twot.Created
             });
         }
-
+        public async Task<string> DeletePost(int id, [Service] TwittorDbContext context)
+        {
+            var post = context.Tweets.Where(e=> e.Id == id).FirstOrDefault();
+            if (post != null)
+            {
+                context.Tweets.Remove(post);
+                await context.SaveChangesAsync();
+            }
+            return await Task.FromResult("Tweet has deleted");
+        }
+        public async Task<Comment> AddComment(CommentInput input, [Service] TwittorDbContext context)
+        {
+            var comment = new Comment
+            {
+                TweetId = input.TweetId,
+                ProfileId = input.ProfileId,
+                Comment1 = input.Comment,
+                Created = DateTime.Now
+            };
+            context.Comments.Add(comment);
+            await context.SaveChangesAsync();
+            return comment;
+        }
     }
 }
