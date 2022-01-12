@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwittorQL", "TwittorQL\Twit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KafkaListener", "KafkaListener\KafkaListener.csproj", "{A381431D-D7B5-439C-9370-FE05E96EC16C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KafkaApp", "KafkaApp\KafkaApp.csproj", "{D1D6984A-1C27-42AA-835E-8DD778875BE9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KafkaCreateTopics", "KafkaCreateTopics\KafkaCreateTopics.csproj", "{7E14262B-2AA2-4F81-82EA-F9433D9A204B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{A381431D-D7B5-439C-9370-FE05E96EC16C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A381431D-D7B5-439C-9370-FE05E96EC16C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A381431D-D7B5-439C-9370-FE05E96EC16C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1D6984A-1C27-42AA-835E-8DD778875BE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1D6984A-1C27-42AA-835E-8DD778875BE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1D6984A-1C27-42AA-835E-8DD778875BE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1D6984A-1C27-42AA-835E-8DD778875BE9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E14262B-2AA2-4F81-82EA-F9433D9A204B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E14262B-2AA2-4F81-82EA-F9433D9A204B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E14262B-2AA2-4F81-82EA-F9433D9A204B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E14262B-2AA2-4F81-82EA-F9433D9A204B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

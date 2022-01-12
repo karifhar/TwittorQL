@@ -28,6 +28,8 @@ namespace TwittorQL
         {
             services.AddDbContext<TwittorDbContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("MyDatabase")));
 
+            services.Configure<KafkaSettings>(Configuration.GetSection("KafkaSettings"));
+
             services
         .        AddGraphQLServer()
                 .AddQueryType<Query>();
