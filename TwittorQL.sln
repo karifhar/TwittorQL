@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32014.148
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwittorQL", "TwittorQL\TwittorQL.csproj", "{68A53CAA-FACF-4069-B8E7-B63099AACCB1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KafkaListener", "KafkaListener\KafkaListener.csproj", "{A381431D-D7B5-439C-9370-FE05E96EC16C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{68A53CAA-FACF-4069-B8E7-B63099AACCB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68A53CAA-FACF-4069-B8E7-B63099AACCB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68A53CAA-FACF-4069-B8E7-B63099AACCB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68A53CAA-FACF-4069-B8E7-B63099AACCB1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A381431D-D7B5-439C-9370-FE05E96EC16C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A381431D-D7B5-439C-9370-FE05E96EC16C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A381431D-D7B5-439C-9370-FE05E96EC16C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A381431D-D7B5-439C-9370-FE05E96EC16C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0D32A5D5-7C5D-4354-970A-5680D95ADA9B}
+	EndGlobalSection
+EndGlobal
