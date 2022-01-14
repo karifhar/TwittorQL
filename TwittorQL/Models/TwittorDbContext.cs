@@ -28,7 +28,8 @@ namespace TwittorQL.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
-
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                optionsBuilder.UseSqlServer("Server=DESKTOP-FVG7KQC\\SQLEXPRESS;Database=TwittorDb;uid=admintwittor;pwd=123456;");
             }
         }
 
@@ -112,7 +113,7 @@ namespace TwittorQL.Models
 
                 entity.Property(e => e.Password)
                     .IsRequired()
-                    .HasMaxLength(50);
+                    .HasColumnType("ntext");
 
                 entity.Property(e => e.Username)
                     .IsRequired()

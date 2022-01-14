@@ -2,6 +2,7 @@
 
 namespace TwittorQL.GraphQL.Data
 {
+    
     public class TweetData
     {
         public int Id { get; set; }
