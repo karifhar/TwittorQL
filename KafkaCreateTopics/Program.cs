@@ -16,14 +16,14 @@ namespace KafkaCreateTopics
                 BootstrapServers = "127.0.0.1:9092",
                 ClientId = Dns.GetHostName(),
             };
-            var topics = new List<String>();
+            var topics = new List<string>();
             topics.Add("logging");
-            topics.Add("tweet");
-            topics.Add("user");
-            topics.Add("role");
-            topics.Add("userRole");
-            topics.Add("profile");
-            topics.Add("commnet");
+            topics.Add("post-tweet");
+            topics.Add("add-user");
+            topics.Add("add-role");
+            topics.Add("change-password");
+            topics.Add("add-profile");
+            topics.Add("add-comment");
             foreach (var topic in topics)
             {
                 using (var adminClient = new AdminClientBuilder(config).Build())

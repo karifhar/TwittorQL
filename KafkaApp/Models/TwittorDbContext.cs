@@ -29,7 +29,7 @@ namespace KafkaApp.Models
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var builder = new ConfigurationBuilder()
-                 .AddJsonFile("appsettings.json", true, true);
+                 .AddJsonFile($"appsettings.json", true, true);
             var config = builder.Build();
             optionsBuilder.UseSqlServer(config["Settings:MyDatabase"]);
         }

@@ -10,13 +10,14 @@ namespace KafkaListener
         static void Main(string[] args)
         {
             var builder = new ConfigurationBuilder()
-                .AddJsonFile("appettings.json", true, true);
+                .AddJsonFile($"appsettings.json", true, true);
+
             var config = builder.Build();
 
             var ServerConfig = new ConsumerConfig
             {
                 BootstrapServers = config["Settings:KafkaServer"],
-                GroupId = "twittorAPI",
+                GroupId = "tester",
                 AutoOffsetReset = AutoOffsetReset.Earliest
             };
 
@@ -44,6 +45,7 @@ namespace KafkaListener
                 }
                 catch (OperationCanceledException)
                 { 
+                    // ctrl+c was pressed
                 } 
                 finally
                 {

@@ -10,7 +10,7 @@ namespace TwittorQL.Kafka
 {
     public class KafkaHelper
     {
-        public async Task<bool> SendMessage(KafkaSettings settings, string topic, string key, string value)
+        public static async Task<bool> SendMessage(KafkaSettings settings, string topic, string key, string value)
         {
             var succeed = false;
             var config = new ProducerConfig
@@ -18,6 +18,7 @@ namespace TwittorQL.Kafka
                 BootstrapServers = settings.Server,
                 ClientId = Dns.GetHostName()
             };
+            Console.WriteLine($"{settings.Server}");
 
             using(var adminClient = new AdminClientBuilder(config).Build())
             {
@@ -28,8 +29,8 @@ namespace TwittorQL.Kafka
                         new TopicSpecification
                         {
                             Name = topic,
-                            NumPartitions = settings.NumPartitions,
-                            ReplicationFactor = settings.ReplicationFactor
+                            NumPartitions = 1,
+                            ReplicationFactor = 1
                         }
                     });
                 }
@@ -67,7 +68,7 @@ namespace TwittorQL.Kafka
                 });
                 producer.Flush(TimeSpan.FromSeconds(10));
             }
-            return succeed;
+            return await Task.FromResult(succeed);
         }
     }
 }

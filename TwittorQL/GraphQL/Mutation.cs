@@ -3,15 +3,19 @@ using HotChocolate.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using TwittorQL.GraphQL.Data;
 using TwittorQL.GraphQL.Input;
+using TwittorQL.Kafka;
+using Newtonsoft.Json;
 using TwittorQL.Models;
 
 namespace TwittorQL.GraphQL
@@ -20,20 +24,31 @@ namespace TwittorQL.GraphQL
     {
         // User
 
-        public async Task<UserData> RegisterUser(RegisterUserInput input, [Service] TwittorDbContext context)
+        public async Task<TransactionStatus> RegisterUser(RegisterUserInput input, 
+            [Service] TwittorDbContext context,
+            [Service] IOptions<KafkaSettings> kafkaSettings)
         {
             var user = context.Users.Where(e => e.Username == input.Username).FirstOrDefault();
             if (user != null)
             {
-                return await Task.FromResult(new UserData());
+                return await Task.FromResult(new TransactionStatus(false, ""));
             }
+
             var newUser = new User()
             {
                 Username = input.Username,
                 Password = BCrypt.Net.BCrypt.HashPassword(input.Password),
             };
-            context.Users.Add(newUser);
-            await context.SaveChangesAsync();
+            //context.Users.Add(newUser);
+            //await context.SaveChangesAsync();
+            var key = "register-user-" + DateTime.Now.ToString();
+            var value = JObject.FromObject(newUser).ToString(Formatting.None);
+            var result = await KafkaHelper.SendMessage(kafkaSettings.Value, "register-user", key, value);
+            await KafkaHelper.SendMessage(kafkaSettings.Value, "logging", key, value);
+
+            var ret = new TransactionStatus(result, "");
+            if (!result)
+                ret = new TransactionStatus(result, "Failed to submit data");
 
             var userForProfile = context.Users.Where(p => p.Id == newUser.Id).FirstOrDefault();
 
@@ -45,18 +60,23 @@ namespace TwittorQL.GraphQL
                     Birth = DateTime.Today,
                     UserId = newUser.Id,
                 };
-                context.Profiles.Add(createProfile);
-                await context.SaveChangesAsync();
+
+                var key1 = "create-profile-" + DateTime.Now.ToString();
+                var value1 = JObject.FromObject(createProfile).ToString(Formatting.None);
+                var data = await KafkaHelper.SendMessage(kafkaSettings.Value, "add-profile", key1, value1);
+                await KafkaHelper.SendMessage(kafkaSettings.Value, "logging", key1, value1);
+
+                var ret1 = new TransactionStatus(data, "");
+                if (!data)
+                    ret1 = new TransactionStatus(data, "Failed to submit data");
             }
 
-            return await Task.FromResult(new UserData()
-            {
-                Id = newUser.Id,
-                Username = newUser.Username,
-            });
+
+            return await Task.FromResult(ret);
         }
        
-        public async Task<UserToken> LoginUser(RegisterUserInput input, [Service] TwittorDbContext context, [Service] IOptions<TokenSettings> tokenSettings)
+        public async Task<UserToken> LoginUser(RegisterUserInput input, [Service] TwittorDbContext context,
+            [Service] IOptions<TokenSettings> tokenSettings)
         {
             var user = context.Users.Where(u => u.Username == input.Username).FirstOrDefault();
             bool valid = BCrypt.Net.BCrypt.Verify(input.Password, user.Password);
@@ -77,15 +97,6 @@ namespace TwittorQL.GraphQL
             var role = context.Roles.Where(r => r.Id == roles.RoleId).FirstOrDefault();
             claims.Add(new Claim(ClaimTypes.Role, role.Name));
 
-
-           /* foreach (var userRole in user.UserRoles)
-            {
-                Console.WriteLine($" masukkkk {claims}");
-                if (role != null)
-                {
-                }
-            } */
-
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenSettings.Value.Key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
             var expired = DateTime.Now.AddHours(6);
@@ -101,38 +112,57 @@ namespace TwittorQL.GraphQL
                     expired.ToString(), null));
         }
 
-        [Authorize(Roles = new[] { "Admin", "member" })]
-        public async Task<string> ChangePassword(ChangePassInput input, [Service] TwittorDbContext context)
+        [Authorize(Roles = new[] { "admin", "member" })]
+        public async Task<TransactionStatus> ChangePassword(ChangePassInput input, [Service] TwittorDbContext context, 
+            [Service] IOptions<KafkaSettings> kafkaSettings)
         {
             var user = context.Users.Where(u => u.Username == input.username).FirstOrDefault();
             bool valid = BCrypt.Net.BCrypt.Verify(input.Password, user.Password);
 
             if (user == null && !valid)
             {
-                return await Task.FromResult("Username atau Password Salah");
+               return await Task.FromResult(new TransactionStatus(false, "Username atau password salah"));
             }
+
             user.Password = BCrypt.Net.BCrypt.HashPassword(input.NewPassword);
-            context.Users.Update(user);
-            await context.SaveChangesAsync();
-            return await Task.FromResult("Berhasil merubah password");
+
+            var key = "change-password-" + DateTime.Now.ToString();
+            var val = JObject.FromObject(user).ToString(Formatting.None);
+            var result = await KafkaHelper.SendMessage(kafkaSettings.Value, "change-password", key, val);
+            await KafkaHelper.SendMessage(kafkaSettings.Value, "logging", key, val);
+
+            var ret = new TransactionStatus(result, "");
+            if (!result)
+                ret = new TransactionStatus(result, "Failed to submit data");
+
+            return await Task.FromResult(ret);
 
         }
         [Authorize(Roles = new[] { "admin" })]
-        public async Task<Role> AddRole(RoleInput input, [Service] TwittorDbContext context) 
+        public async Task<TransactionStatus> AddRole(RoleInput input, [Service] TwittorDbContext context, 
+            [Service] IOptions<KafkaSettings> kafkaSettings) 
         {
             var role = context.Roles.Where(r => r.Name == input.Name).FirstOrDefault();
             if (role != null)
             {
-                return await Task.FromResult(role);
+                return await Task.FromResult(new TransactionStatus(false, "role tidak ditemukan"));
             }
 
             var newRole = new Role()
             {
                 Name = input.Name,
             };
-            context.Roles.Add(newRole);
-            await context.SaveChangesAsync();
-            return newRole;
+
+            var key = "add-role-" + DateTime.Now.ToString();
+            var val = JObject.FromObject(newRole).ToString(Formatting.None);
+            var result = await KafkaHelper.SendMessage(kafkaSettings.Value, "add-role", key, val);
+            await KafkaHelper.SendMessage(kafkaSettings.Value, "logging", key, val);
+
+            var ret = new TransactionStatus(result, "");
+            if (!result)
+                ret = new TransactionStatus(result, "Failed to submit data");
+
+            return await Task.FromResult(ret);
         }
        [Authorize(Roles = new[] { "admin" })]
         public async Task<UserRole> AddRoleTouser(CreateUserRoleInput input, [Service] TwittorDbContext context)
@@ -170,7 +200,8 @@ namespace TwittorQL.GraphQL
 
         // Twittor
         [Authorize(Roles = new string[] { "member" })]
-        public async Task<TweetData> AddPost(TweetInput input, [Service] TwittorDbContext context)
+        public async Task<TweetData> AddPost(TweetInput input, [Service] TwittorDbContext context, 
+            [Service] IOptions<KafkaSettings> kafkaSettings)
         {
             var user = context.Users.Where(u => u.Id == input.id).FirstOrDefault();
             var profile = context.Profiles.Where(p => p.UserId == user.Id).FirstOrDefault();
@@ -194,7 +225,8 @@ namespace TwittorQL.GraphQL
             });
         }
         [Authorize(Roles = new string[] { "member" })]
-        public async Task<string> DeletePost(int input, [Service] TwittorDbContext context)
+        public async Task<string> DeletePost(int input, [Service] TwittorDbContext context, 
+            [Service] IOptions<KafkaSettings> kafkaSettings)
         {
             var post = context.Tweets.Where(e=> e.Id == input).FirstOrDefault();
             bool isSuccess = false;
@@ -211,7 +243,8 @@ namespace TwittorQL.GraphQL
             return await Task.FromResult("Failed to delete post");
         }
         [Authorize(Roles = new string[] { "member" })]
-        public async Task<Comment> AddComment(CommentInput input, [Service] TwittorDbContext context)
+        public async Task<Comment> AddComment(CommentInput input, [Service] TwittorDbContext context, 
+            [Service] IOptions<KafkaSettings> kafkaSettings)
         {
             var tweet = context.Tweets.Where(t => t.Id == input.TweetId).FirstOrDefault();
             var profile = context.Profiles.Where(p => p.Id == input.ProfileId).FirstOrDefault();
