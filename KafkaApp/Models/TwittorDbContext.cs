@@ -1,10 +1,12 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 #nullable disable
 
-namespace TwittorQL.Models
+namespace KafkaApp.Models
 {
     public partial class TwittorDbContext : DbContext
     {
@@ -26,10 +28,10 @@ namespace TwittorQL.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if (!optionsBuilder.IsConfigured)
-            {
-
-            }
+            var builder = new ConfigurationBuilder()
+                 .AddJsonFile("appsettings.json", true, true);
+            var config = builder.Build();
+            optionsBuilder.UseSqlServer(config["Settings:MyDatabase"]);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

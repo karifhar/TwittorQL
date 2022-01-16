@@ -65,6 +65,7 @@ namespace TwittorQL.Kafka
                         succeed = true;
                     }
                 });
+                producer.Flush(TimeSpan.FromSeconds(10));
             }
             return succeed;
         }

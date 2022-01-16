@@ -1,4 +1,5 @@
 ﻿using HotChocolate;
+using HotChocolate.AspNetCore.Authorization;
 using System.Linq;
 using TwittorQL.GraphQL.Data;
 using TwittorQL.Models;
@@ -7,6 +8,7 @@ namespace TwittorQL.GraphQL
 {
     public class Query
     {
+        [Authorize]
         public IQueryable<TweetData> GetTweets([Service] TwittorDbContext context)
         {
             var data = context.Tweets.Select(t => new TweetData
